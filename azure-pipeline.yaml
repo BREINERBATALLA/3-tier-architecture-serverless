@@ -2,6 +2,92 @@ trigger:
   branches:
     include:
     - main
-  paths:
-    exclude:
-    - diagrama-infraestructura.pdf
+
+pool:
+   vmImage: 'ubuntu-20.04'
+
+variables:
+- group: context
+
+steps:
+- task: CloudFormationCreateOrUpdateStack@1
+  inputs:
+    awsCredentials: '$(awsServiceConnection)'
+    regionName: '$(region)'
+    stackName: 'nested-content-stack'
+    templateSource: 'file'
+    templateFile: '$(System.DefaultWorkingDirectory)/bucket-nested.yaml'
+    templateParametersSource: 'inline'
+    templateParameters: |
+      [
+        {
+          "ParameterKey": "NameBucket",
+          "ParameterValue": "templates-nested-challenge-final-deploy"
+        }
+      ]
+    captureStackOutputs: 'asVariables'
+    capabilityAutoExpand: true
+    captureAsSecuredVars: false
+
+- task: S3Upload@1
+  inputs:
+    awsCredentials: '$(awsServiceConnection)'
+    regionName: '$(region)'
+    bucketName: '$(BucketNameTemplates)'
+    sourceFolder: '$(System.DefaultWorkingDirectory)/templates'
+    globExpressions: '**/*.yaml'
+
+- task: CloudFormationCreateOrUpdateStack@1
+  inputs:
+    awsCredentials: '$(awsServiceConnection)'
+    regionName: '$(region)'
+    stackName: 'root-stack-infraestructure'
+    templateSource: 'file'
+    templateFile: '$(System.DefaultWorkingDirectory)/root-stack.yaml'
+    templateParametersSource: 'inline'
+    templateParameters: |
+      [
+            {
+            		"ParameterKey":"NameBucketCloudFront",
+            		 
+                   "ParameterValue":"code-frontend-cloudfront-origin-challenge"
+            },
+      {
+            		"ParameterKey":"NameBucketSourceCode",
+            		 
+                   "ParameterValue":"code-bucket-challenge-lambda-apigateway"
+            },
+            {
+            	"ParameterKey":"Stage",
+            		 
+                   "ParameterValue":"prod"
+            },
+            {
+            	"ParameterKey":"NameObject",
+            		 
+                   "ParameterValue":"backend.zip"
+            },
+            {
+            	"ParameterKey":"NameTableDynamoDB",
+            		 
+                   "ParameterValue":"product_table"
+            },
+            {
+            	"ParameterKey":"PrefixDomain",
+            		 
+                   "ParameterValue":"my-test-user-pool-domain-final-brei-challenge-cloud"
+            },
+            {
+            	"ParameterKey":"NameBucketImagesProducts",
+            		 
+                   "ParameterValue":"images-bucket-challenge-final-inventory"
+            },
+            {
+            	"ParameterKey":"NameBucketLoggingCloudfront",
+            		 
+                   "ParameterValue":"logging-cloudfront-final-challenge"
+            }                       
+            ]
+    captureStackOutputs: 'asVariables'
+    capabilityAutoExpand: true
+    captureAsSecuredVars: false
