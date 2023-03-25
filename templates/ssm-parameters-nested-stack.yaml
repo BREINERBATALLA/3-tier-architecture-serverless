@@ -54,7 +54,7 @@ Resources:
       Value: !Ref NameBucketImages
       Name: BucketNameImages
   
-  UrlHostedUISsmParameter:
+  UrlHostedSsmParameter:
     Type: AWS::SSM::Parameter
     Properties: 
       Type: String 
