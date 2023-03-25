@@ -59,7 +59,7 @@ Resources:
     Properties: 
       Type: String 
       Value: !Ref HostedUIUrl
-      Name: UrlHostedUI  
+      Name: UrlHosted  
   
   CloudFrontUrlSsmParameter:
     Type: AWS::SSM::Parameter
