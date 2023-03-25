@@ -149,7 +149,7 @@ Resources:
     #  AuthorizerUri: String #Apig envia a este uri las solicitudes para validar los tokens, cognito user_pools ya tiene una integration corporada con el servicio de cognito user pools, lo que permite que la api g verifique automaticamente los tokens de acceso jwt generados por el servicio de cognito
       AuthorizerResultTtlInSeconds: 300
       IdentitySource: method.request.header.Authorization #Header a enviar con el valor del token en los request
-      IdentityValidationExpression: '^Bearer [A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$'
+  #    IdentityValidationExpression: '^Bearer [A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$'
       ProviderARNs: 
         - !GetAtt CognitoUserPool.Arn
       RestApiId: !Ref MyRestApi
@@ -249,6 +249,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref NameTableDynamo
+          BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10
 
   DeleteFunction:
@@ -264,6 +265,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref NameTableDynamo
+          BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10
 
   PutFunction:
@@ -279,6 +281,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref NameTableDynamo
+          BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10
 
   PostFunction:
@@ -294,6 +297,7 @@ Resources:
       Environment:
         Variables:
           TABLE_NAME: !Ref NameTableDynamo
+          BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10  
       #LambdaExecutionRole  
 ############################################## ROLES LAMBDA ###################################
@@ -346,7 +350,8 @@ Resources:
             Statement:
             - Effect: Allow
               Action:
-              - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
               Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
 
   DynamoAndExecutionRoleDelete:
@@ -395,7 +400,8 @@ Resources:
             Statement:
             - Effect: Allow
               Action:
-              - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
               Resource: !Sub arn:aws:s3:::${NameBucketImages}/*        
 
 
@@ -445,7 +451,8 @@ Resources:
             Statement:
             - Effect: Allow
               Action:
-              - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
               Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
 
   DynamoAndExecutionRoleUpdate:
@@ -494,7 +501,8 @@ Resources:
             Statement:
             - Effect: Allow
               Action:
-              - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
               Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
 ############################################## STAGE API ###################################
 
