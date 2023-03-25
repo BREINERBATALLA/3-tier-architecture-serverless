@@ -47,14 +47,14 @@ Resources:
       Value: !Ref NameBucketCode
       Name: BucketNameCode
 
-  NameBucketCodeSsmParameter:
+  NameBucketImageSsmParameter:
     Type: AWS::SSM::Parameter
     Properties: 
       Type: String 
       Value: !Ref NameBucketImages
       Name: BucketNameImages
   
-  NameBucketCodeSsmParameter:
+  UrlHostedUISsmParameter:
     Type: AWS::SSM::Parameter
     Properties: 
       Type: String 

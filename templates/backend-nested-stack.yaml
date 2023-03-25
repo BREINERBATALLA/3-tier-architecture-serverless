@@ -243,7 +243,7 @@ Resources:
       Code:
         ZipFile: |
           console.log('Hi world')    
-      Handler: handler.getTasks
+      Handler: handler.getProducts
       Role: !GetAtt DynamoAndExecutionRoleGet.Arn
       Runtime: nodejs12.x
       Environment:
@@ -258,7 +258,7 @@ Resources:
       Code:
         ZipFile: |
           console.log('Hi world')    
-      Handler: handler.deleteTask
+      Handler: handler.deleteProduct
       Role: !GetAtt DynamoAndExecutionRoleDelete.Arn
       Runtime: nodejs12.x
       Environment:
@@ -273,7 +273,7 @@ Resources:
       Code:
         ZipFile: |
           console.log('Hi world')           
-      Handler: handler.updateTask
+      Handler: handler.updateProduct
       Role: !GetAtt DynamoAndExecutionRoleUpdate.Arn
       Runtime: nodejs12.x
       Environment:
@@ -288,7 +288,7 @@ Resources:
       Code:
         ZipFile: |
           console.log('Hi world')       
-      Handler: handler.saveTask
+      Handler: handler.saveProduct
       Role: !GetAtt DynamoAndExecutionRolePost.Arn
       Runtime: nodejs12.x
       Environment:
