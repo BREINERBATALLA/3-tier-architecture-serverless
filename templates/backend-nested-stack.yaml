@@ -1,0 +1,582 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Infraestructure to deploy backend app - api gw y lambda functions'
+
+Parameters:
+  Stage:
+    Type: String
+    Default: prod
+    Description: Name stage 
+  NameBucket:
+    Type: String
+    Default: example-code-bucket-challenge
+    Description: Name bucket that contains object with source code
+  NameTableDynamo:
+    Type: String
+    Default: products
+    Description: Tabless name dynamoDB
+  NameObject:
+    Type: String
+    Default: backend.zip
+    Description: Name object .zip that contains source code  
+  Prefix:
+    Type: String
+    Default: my-test-user-pool-domain-final-brei-challenge-cloud
+    Description: Prefix to domain Name
+  NameBucketImages:
+    Type: String
+    Default: images-bucket-challenge-final-inventory
+    Description: Prefix to domain Name
+    
+#Mappings:
+
+#Conditions:
+
+Resources:
+
+
+############################################## BUCKET SOURCE CODE ###################################
+  BucketSourceCode:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref NameBucket
+    DeletionPolicy: Delete
+      
+  BucketSourceImages:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref NameBucketImages
+    DeletionPolicy: Delete
+################################## BUCKET POLICY TO GRANT FRONT GET OBJECTS BY URL ###############
+  BucketImagesPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BucketSourceImages
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - 's3:GetObject'
+            Effect: Allow
+            Resource: !Join
+              - ''
+              - - 'arn:aws:s3:::'
+                - !Ref NameBucketImages
+                - /*
+            Principal: '*'
+############################################## RESTAPI ###################################
+  MyRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties: 
+      Description: Rest Api for get and create task that will be persistence in a dynaomodb table throught lambda functions
+      Name: ChallengeApi
+############################################## RECURSOS API ###################################
+  MyResourceGeneral:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyRestApi
+      ParentId: !GetAtt MyRestApi.RootResourceId
+      PathPart: products
+
+  MyResourceId:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref MyRestApi
+      ParentId: !Ref MyResourceGeneral
+      PathPart: "{productid}"
+
+############################################## METODOS API ###################################
+
+  MyGetAllMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyRestApi
+      ResourceId: !Ref MyResourceGeneral
+      HttpMethod: GET
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref AuthorizerAPI
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAllFunction.Arn}/invocations"
+
+  MyPostMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        RestApiId: !Ref MyRestApi
+        ResourceId: !Ref MyResourceGeneral
+        HttpMethod: POST
+        AuthorizationType: COGNITO_USER_POOLS
+        AuthorizerId: !Ref AuthorizerAPI
+        Integration:
+          IntegrationHttpMethod: POST
+          Type: AWS_PROXY
+          Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostFunction.Arn}/invocations"
+
+
+  MyPutMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyRestApi
+      ResourceId: !Ref MyResourceId
+      HttpMethod: PUT
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref AuthorizerAPI
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutFunction.Arn}/invocations"
+
+
+
+  MyDeleteMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref MyRestApi
+      ResourceId: !Ref MyResourceId
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref AuthorizerAPI
+      HttpMethod: DELETE
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteFunction.Arn}/invocations"
+
+################################## API AUTHORIZER ############################################
+  AuthorizerAPI:
+    Type: AWS::ApiGateway::Authorizer
+    Properties: 
+      Name: ApiGatewayAuthorizer
+    #  AuthorizerUri: String #Apig envia a este uri las solicitudes para validar los tokens, cognito user_pools ya tiene una integration corporada con el servicio de cognito user pools, lo que permite que la api g verifique automaticamente los tokens de acceso jwt generados por el servicio de cognito
+      AuthorizerResultTtlInSeconds: 300
+      IdentitySource: method.request.header.Authorization #Header a enviar con el valor del token en los request
+      IdentityValidationExpression: '^Bearer [A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]*$'
+      ProviderARNs: 
+        - !GetAtt CognitoUserPool.Arn
+      RestApiId: !Ref MyRestApi
+      Type: COGNITO_USER_POOLS
+
+############################################# COGNITO USER POOL ###################################
+  CognitoUserPool:  
+    Type: AWS::Cognito::UserPool
+    Properties: 
+      AliasAttributes:  ##que atributos del usuario se pueden usar como alias de inicio de sesión en lugar del username(default option)
+        - email
+      AutoVerifiedAttributes: ##Cognito valida automaticamente email y phone number
+        - email
+      EnabledMfas: 
+        - SOFTWARE_TOKEN_MFA
+##      LambdaConfig: #Trigger to configure info new user pool - to validate emial
+##        LambdaConfig 
+      MfaConfiguration: 'ON' ##Si es obligatoria(ON) u opcional
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true ##Don't show sign up, just admin can create users
+      Policies: 
+         PasswordPolicy: 
+            MinimumLength: 8
+            RequireNumbers: true
+            RequireSymbols: true
+          ## TemporaryPasswordValidityDays:
+      Schema: 
+        - Name: name
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+        - Name: email
+          AttributeDataType: String
+          Mutable: false
+          Required: true
+        - Name: phone_number
+          AttributeDataType: String
+          Mutable: false
+          Required: false
+      UsernameConfiguration:
+         CaseSensitive: false
+      UserPoolName: user-pool-cognito-api-final-challenge
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties: 
+      AccessTokenValidity: 1 ##! hours to expire, we can modify per days in tokenvalidatyUinits in apig
+      AllowedOAuthFlows: 
+        - implicit
+      AllowedOAuthFlowsUserPoolClient: true #?Seguir protocolo de OAuth
+      AllowedOAuthScopes:  ##Grant access to data to the app se emite en el flowOAuth
+        - email
+        - profile
+        - openid #Obligatorio por email
+#      AnalyticsConfiguration:  AWS pinpont metrics
+#        AnalyticsConfiguration
+      AuthSessionValidity: 15 ##Tiempo para que la api responda, o se expira la sesion token
+      CallbackURLs: 
+        - !Sub 
+          - 'https://${UrlCloudFront}'
+          - UrlCloudFront: !ImportValue CloudFrontUrl
+        #!ImportValue cloudfronturl
+      ClientName: user-pool-client-name-final-challenge
+     # DefaultRedirectURI: !ImportValue cloudfronturl
+#      ExplicitAuthFlows: 
+#        - String
+      IdTokenValidity: 1
+#      LogoutURLs: 
+#        - #Return hosted ui
+      PreventUserExistenceErrors: ENABLED ##Get info about what field is wrong 
+#      RefreshTokenValidity: 0 ##usa default that's 30 days.
+##     TokenValidityUnits:  ##por defecto par aid token y aceess token unit is hour and to refresh is days.
+##        TokenValidityUnits
+      SupportedIdentityProviders:
+        - COGNITO ##Habilita Hosted UI
+      UserPoolId: !Ref CognitoUserPool
+
+  UserPoolDomain: 
+    Type: AWS::Cognito::UserPoolDomain 
+    Properties:
+      UserPoolId: !Ref CognitoUserPool 
+      Domain: !Ref Prefix
+
+
+############################################## FUNCIONES LAMBDA ###################################
+
+  GetAllFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: BucketSourceCode 
+    Properties:
+      Code:
+        ZipFile: |
+          console.log('Hi world')    
+      Handler: handler.getTasks
+      Role: !GetAtt DynamoAndExecutionRoleGet.Arn
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref NameTableDynamo
+      Timeout: 10
+
+  DeleteFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: BucketSourceCode    
+    Properties:
+      Code:
+        ZipFile: |
+          console.log('Hi world')    
+      Handler: handler.deleteTask
+      Role: !GetAtt DynamoAndExecutionRoleDelete.Arn
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref NameTableDynamo
+      Timeout: 10
+
+  PutFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: BucketSourceCode
+    Properties:
+      Code:
+        ZipFile: |
+          console.log('Hi world')           
+      Handler: handler.updateTask
+      Role: !GetAtt DynamoAndExecutionRoleUpdate.Arn
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref NameTableDynamo
+      Timeout: 10
+
+  PostFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: BucketSourceCode
+    Properties:
+      Code:
+        ZipFile: |
+          console.log('Hi world')       
+      Handler: handler.saveTask
+      Role: !GetAtt DynamoAndExecutionRolePost.Arn
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref NameTableDynamo
+      Timeout: 10  
+      #LambdaExecutionRole  
+############################################## ROLES LAMBDA ###################################
+  DynamoAndExecutionRoleGet:
+    Type: "AWS::IAM::Role"
+    ##Maybe need dependsOn bucket, but object?
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "MyLambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+        - PolicyName: CFNLambdaPermission
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                  - dynamodb:Scan
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NameTableDynamo}"
+        - PolicyName: S3GetObjectPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucket}/${NameObject}
+        - PolicyName: ImagesBucketPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
+
+  DynamoAndExecutionRoleDelete:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "MyLambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+        - PolicyName: CFNLambdaPermission
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DeleteItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NameTableDynamo}"
+        - PolicyName: S3GetObjectPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucket}/${NameObject}
+        - PolicyName: ImagesBucketPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*        
+
+
+  DynamoAndExecutionRolePost:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "MyLambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+        - PolicyName: CFNLambdaPermission
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NameTableDynamo}"
+        - PolicyName: S3GetObjectPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucket}/${NameObject}
+        - PolicyName: ImagesBucketPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
+
+  DynamoAndExecutionRoleUpdate:
+    Type: "AWS::IAM::Role"
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: "MyLambdaPolicy"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+        - PolicyName: CFNLambdaPermission
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:UpdateItem
+                Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NameTableDynamo}"
+        - PolicyName: S3GetObjectPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucket}/${NameObject}
+        - PolicyName: ImagesBucketPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:GetObject
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
+############################################## STAGE API ###################################
+
+  LambdaApiGatewayStage:
+    Type: AWS::ApiGateway::Stage ##Define publicación de la api
+    Properties:
+      DeploymentId: !Ref gatewayDeploy
+      Description: Lambda API Stage v0
+      RestApiId: !Ref MyRestApi
+      StageName: !Ref Stage
+############################################## PERMISSIONS LAMBDA ###################################
+
+  lambdaApiGatewayInvokeGetAll: #Le concede permisos a un servicio de aws para usar una función lambda.
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt GetAllFunction.Arn
+      Principal: apigateway.amazonaws.com
+ #     SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${MyRestApi}/${Stage}/GET/${MyResource}"
+  lambdaApiGatewayInvokePut: #Le concede permisos a un servicio de aws para usar una función lambda.
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PutFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  lambdaApiGatewayInvokeDelete: #Le concede permisos a un servicio de aws para usar una función lambda.
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt DeleteFunction.Arn
+      Principal: apigateway.amazonaws.com
+
+  lambdaApiGatewayInvokePost: #Le concede permisos a un servicio de aws para usar una función lambda.
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt PostFunction.Arn
+      Principal: apigateway.amazonaws.com
+############################################## DEPLOY API ###################################
+
+  gatewayDeploy:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - MyGetAllMethod
+    Properties:
+      RestApiId: !Ref MyRestApi
+############################################## OUTPUTS ###################################
+  
+Outputs:
+  UriFrontEnd:
+    Value: !Sub '${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}'
+    Description: Uri to consume backend resources.
+  Object:
+    Value: !Ref NameObject
+    Description: Name object
+  Bucket:
+    Value: !Ref NameBucket
+    Description: Bucket source code
+  LambdaGetName:
+    Value: !Sub "${GetAllFunction}"
+    Description: Nombre getAll function
+  LambdaPostName:
+    Value: !Sub "${PostFunction}"
+    Description: Nombre Post function
+  LambdaPutName:  
+    Value: !Sub "${PutFunction}"
+    Description: Nombre Put function
+  LambdaDeleteName:
+    Value: !Sub "${DeleteFunction}"
+    Description: Nombre Delete function
+  UrlCognitoUserPool:
+    Value: !Ref CognitoUserPool
+    Description: ProviderURL User pool
+  CognitoDomain:
+    Value: !Sub "https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com"
+    Description: Domain Cognito
+  HostedUIURL:
+    Value: !Sub 
+      - https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?response_type=token&client_id=${CognitoUserPoolClient}&redirect_uri=https://${callbackUrl}
+      - callbackUrl: !ImportValue CloudFrontUrl
+    Description: HostedUI url
+  NameBucketImages:
+    Value: !Ref NameBucketImages
+    Description: Name bucket images

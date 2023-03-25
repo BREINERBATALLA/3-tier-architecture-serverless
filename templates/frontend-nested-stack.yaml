@@ -1,0 +1,188 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Infraestructure to deploy source code in s3 bucket, origin from cloudfront '
+
+Parameters:
+  NameBucketCode:
+    Type: String
+    Default: code-frontend-final-challenge
+    Description: Name bucket that contains front end app
+  NameBucketLogging:
+    Type: String
+    Default: bucketname.s3.amazonaws.com-logging-cloudfront-final-challenge
+    Description: Name bucket that contains front end app  
+
+Resources:
+  BucketSourceCode:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref NameBucketCode
+    DeletionPolicy: Delete
+
+  BucketLogging:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref NameBucketLogging
+      AccessControl: Private
+      LoggingConfiguration: ##To save in (DestinationBucketName) los registros del bucket que contiene logs, es decir tener info a cerca de quien está haciendo a los logs de este bucket.
+        ##DestinationBucketName: !Ref NameBucketLogging- Por default los guarda en el mismo
+        LogFilePrefix: cloudfront-logs/
+    DeletionPolicy: Delete
+    
+  BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref NameBucketLogging
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: AllowCloudFrontToWriteLogs
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:PutObject
+            Resource: !Sub arn:aws:s3:::${NameBucketLogging}/cloudfront-logs/*
+  
+    
+  OriginAccessIdentityCF:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    DependsOn: BucketSourceCode
+    Properties: 
+      CloudFrontOriginAccessIdentityConfig: 
+        Comment: !Ref BucketSourceCode
+
+
+  CloudfrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: BucketSourceCode
+    Properties:
+      DistributionConfig:
+        DefaultRootObject: index.html  
+        HttpVersion: http2 
+        DefaultCacheBehavior:
+          TargetOriginId: origins3
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+              Cookies:
+                  Forward: none
+              QueryString: false          
+          AllowedMethods: 
+                  - GET
+                  - HEAD
+        Logging:
+          Bucket: !Sub '${NameBucketLogging}.s3.amazonaws.com'
+          IncludeCookies: true
+          Prefix: CloudfrontAngular/
+        Origins:
+            - DomainName: !GetAtt BucketSourceCode.DomainName
+              Id: origins3
+              S3OriginConfig: 
+                  OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentityCF}
+        WebACLId: !GetAtt WebACLProtection.Arn
+        Enabled: true
+        PriceClass: PriceClass_100
+
+  BucketPolicyOAI:
+      Type: "AWS::S3::BucketPolicy"
+      Properties:
+          Bucket: !Ref BucketSourceCode
+          PolicyDocument:
+              Statement:
+                  - Action: "s3:GetObject"
+                    Effect: Allow
+                    Resource:
+                        - !Sub "${BucketSourceCode.Arn}"
+                        - !Sub "${BucketSourceCode.Arn}/*"
+                    Principal:
+                        CanonicalUser: !GetAtt OriginAccessIdentityCF.S3CanonicalUserId
+
+  WebACLProtection:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: WebACLProtection
+      Scope: CLOUDFRONT
+      DefaultAction: ##si no se cumplen las reglas, permite el acceso {} todos
+        Allow: {}
+      VisibilityConfig: 
+        CloudWatchMetricsEnabled: true
+        MetricName: AccesoDefault
+        SampledRequestsEnabled: true
+      Description: "Protects against SQL injection attacks"
+      Rules:
+        - Name: SqlInjectionRule
+          Priority: 1
+          Action:
+            Block: {}
+          VisibilityConfig: ##cloudwatch
+            CloudWatchMetricsEnabled: true
+            MetricName: SqlInjectionRule
+            SampledRequestsEnabled: true
+          Statement:
+            OrStatement:
+              Statements:
+                - ByteMatchStatement:
+                    FieldToMatch: ##bloquear solicitudes que contengan caracteres usados en sql injection
+                      SingleHeader:
+                        Name: "User-Agent"
+                    TextTransformations:
+                      - Type: COMPRESS_WHITE_SPACE
+                        Priority: 2
+                      - Type: HTML_ENTITY_DECODE
+                        Priority: 3
+                      - Type: LOWERCASE
+                        Priority: 1
+                    PositionalConstraint: CONTAINS
+                    SearchString: "'|\"|;|:|<|>|=|{" 
+                - ByteMatchStatement:  ##ByMachStatement con sus searchStrings..
+                    FieldToMatch:
+                      SingleHeader:
+                        Name: "User-Agent" ##Encabezado para identificar el software del cliente que realiza la solicitud.  Ayuda a identificar solitidues malintencionadas. Se compara el valor de este header con las expresiones para detectar ataques de inyeccion sql
+                    TextTransformations:
+                      - Type: COMPRESS_WHITE_SPACE
+                        Priority: 2
+                      - Type: HTML_ENTITY_DECODE
+                        Priority: 3
+                      - Type: LOWERCASE
+                        Priority: 1
+                    PositionalConstraint: CONTAINS
+                    SearchString: "\\b(select|update|insert|delete|drop|alter|create|truncate)\\b"
+        - Name: AWS-AWSManagedRulesCommonRuleSet
+          Priority: 2
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+              RuleActionOverrides:
+              - ActionToUse:
+                  Count: {}
+                Name: NoUserAgent_HEADER
+              ExcludedRules: []
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesCommonRuleSet 
+
+  MyWebACLLogging:
+    Type: AWS::WAFv2::LoggingConfiguration
+    DependsOn: MyLogDestination
+    Properties:
+      ResourceArn: !GetAtt WebACLProtection.Arn
+      LogDestinationConfigs: ##Grupo de logs a dónde se envian los logs
+        - !GetAtt MyLogDestination.Arn
+   #   RedactedFields: ## que partes de la solicitud quiero proteger(que no se envíe a los logs, ejemplo: info bancaria, contraseñas..)
+
+
+  MyLogDestination:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: aws-waf-logs-finalchallenge #El nombre del logGruop MUST empezar con aws-waf-logs-  ##se puede configurar una key de KMS para encryptar la data de los logs..
+      RetentionInDays: 7 ##cuanto tiempo se tendrán los logs antes de eliminarlos
+  
+
+Outputs:
+  CloudFrontEndPoint:
+    Value: !GetAtt CloudfrontDistribution.DomainName
+    Description: Endpoint cloudfront
+    Export:
+      Name: CloudFrontUrl  

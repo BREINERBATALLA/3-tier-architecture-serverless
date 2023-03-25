@@ -1,0 +1,124 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Infraestructure to deploy full stack app'
+
+Parameters:
+  NameBucketCloudFront:
+    Type: String
+    Default: code-frontend-cloudfront-origin
+    Description: Name bucket that contains front end app  
+  NameBucketSourceCode:
+    Type: String
+    Default: code-bucket-challenge-lambda-apigateway
+    Description: Name bucket that contains object with source code
+  Stage:
+    Type: String
+    Default: prod
+    Description: Name stage 
+  NameObject:
+    Type: String
+    Default: backend.zip
+    Description: Name object .zip that contains source code
+  NameTableDynamoDB:
+    Type: String
+    Default: products
+    Description: Tabless name dynamoDB
+  PrefixDomain:
+    Type: String
+    Default: my-test-user-pool-domain-final-brei-challenge-cloud
+    Description: Prefix to domain Name
+  NameBucketImagesProducts:
+    Type: String
+    Default: images-bucket-challenge-final-inventory
+    Description: Image inventory bucket
+  NameBucketLoggingCloudfront:
+    Type: String
+    Default: logging-cloudfront-final-challenge
+    Description: Name bucket that contains logging cloudfront
+
+Resources:
+
+  FrontendStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 
+        - 'https://${NameTemplateBucket}.s3.amazonaws.com/frontend-nested-stack.yaml' 
+        - NameTemplateBucket: !ImportValue MyBucketTemplateName
+      Parameters:
+        NameBucketCode: !Ref NameBucketCloudFront
+        NameBucketLogging: !Ref NameBucketLoggingCloudfront
+
+  SSMParameterStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: 
+      - BackendStack
+      - FrontendStack
+      - DataStack
+    Properties:
+      TemplateURL: !Sub 
+        - 'https://${NameTemplateBucket}.s3.amazonaws.com/ssm-parameters-nested-stack.yaml' 
+        - NameTemplateBucket: !ImportValue MyBucketTemplateName
+      Parameters:
+        NameBucketCode: !Ref NameBucketSourceCode
+        CloudFrontUrl: !GetAtt FrontendStack.Outputs.CloudFrontEndPoint
+        BucketNameCloudFront: !Ref NameBucketCloudFront
+        BucketNameTemplates: !ImportValue MyBucketTemplateName
+        ObjectName: !Ref NameObject
+        UrlApi: !GetAtt BackendStack.Outputs.UriFrontEnd
+        DeleteFunctionName: !GetAtt BackendStack.Outputs.LambdaDeleteName
+        PutFunctionName: !GetAtt BackendStack.Outputs.LambdaPutName
+        PostFunctionName: !GetAtt BackendStack.Outputs.LambdaPostName
+        GetFunctionName: !GetAtt BackendStack.Outputs.LambdaGetName
+        HostedUIUrl: !GetAtt BackendStack.Outputs.HostedUIURL
+        NameBucketImages: !Ref NameBucketImagesProducts 
+
+        
+
+  DataStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 
+        - 'https://${NameTemplateBucket}.s3.amazonaws.com/data-nested-stack.yaml' 
+        - NameTemplateBucket: !ImportValue MyBucketTemplateName
+      Parameters:
+        NameTableDynamo: !Ref NameTableDynamoDB
+
+  BackendStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn:
+      - DataStack
+      - FrontendStack
+    Properties:
+      TemplateURL: !Sub 
+        - 'https://${NameTemplateBucket}.s3.amazonaws.com/backend-nested-stack.yaml' 
+        - NameTemplateBucket: !ImportValue MyBucketTemplateName
+      Parameters:
+        Stage: !Ref Stage
+        NameBucket: !Ref NameBucketSourceCode
+        NameTableDynamo: !Ref NameTableDynamoDB
+        NameObject: !Ref NameObject
+        Prefix: !Ref PrefixDomain
+        NameBucketImages: !Ref NameBucketImagesProducts 
+
+Outputs:
+  CloudFrontUrl: 
+    Value: !GetAtt FrontendStack.Outputs.CloudFrontEndPoint
+  BucketNameCloudfront: 
+    Value: !Ref NameBucketCloudFront
+  BucketNameTemplates: 
+    Value: !ImportValue MyBucketTemplateName
+  ObjectName: 
+    Value: !Ref NameObject
+  BucketSourceCode: 
+    Value: !Ref NameBucketSourceCode
+  UrlApi: 
+    Value: !GetAtt BackendStack.Outputs.UriFrontEnd  
+  DeleteFunction:
+    Value: !GetAtt BackendStack.Outputs.LambdaDeleteName 
+  PutFunction:
+    Value: !GetAtt BackendStack.Outputs.LambdaPutName 
+  GetFunction:
+    Value: !GetAtt BackendStack.Outputs.LambdaGetName 
+  PostFunction:
+    Value: !GetAtt BackendStack.Outputs.LambdaPostName 
+  HostedUIUrl:
+    Value: !GetAtt BackendStack.Outputs.HostedUIURL

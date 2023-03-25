@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Infraestructure to deploy ssm parameters tha will contain outputs from root stack '
+
+Parameters:
+  NameBucketCode:
+    Type: String
+
+  CloudFrontUrl:
+    Type: String
+
+  BucketNameCloudFront:
+    Type: String
+
+  BucketNameTemplates:
+    Type: String
+
+  ObjectName:
+    Type: String
+
+  UrlApi:
+    Type: String
+
+  DeleteFunctionName:
+    Type: String
+
+  PutFunctionName:
+    Type: String
+
+  PostFunctionName:
+    Type: String
+
+  GetFunctionName:
+    Type: String
+  
+  HostedUIUrl:
+    Type: String
+  
+  NameBucketImages:
+    Type: String
+
+
+Resources:
+  NameBucketCodeSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref NameBucketCode
+      Name: BucketNameCode
+
+  NameBucketCodeSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref NameBucketImages
+      Name: BucketNameImages
+  
+  NameBucketCodeSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref HostedUIUrl
+      Name: UrlHostedUI  
+  
+  CloudFrontUrlSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref CloudFrontUrl
+      Name: CloudFrontUrl
+
+  BucketNameCloudfrontSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref BucketNameCloudFront
+      Name: BucketNameCloudFront
+  
+  BucketNameTemplateSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref BucketNameTemplates 
+      Name: BucketNameTemplates
+
+  ObjectNameSsmParameter: 
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref ObjectName
+      Name: ObjectName
+  
+
+  UrlApiSsmParameter: 
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref UrlApi
+      Name: UrlApiGateway
+
+  DeleteFunctionNameSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref DeleteFunctionName
+      Name: DeleteFunctionName
+
+  PutFunctionNameSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref PutFunctionName
+      Name: PutFunctionName
+
+  GetFunctionNameSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref GetFunctionName
+      Name: GetFunctionName
+
+  PostFunctionSsmParameter:
+    Type: AWS::SSM::Parameter
+    Properties: 
+      Type: String 
+      Value: !Ref PostFunctionName
+      Name: PostFunctionName
+     

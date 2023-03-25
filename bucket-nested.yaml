@@ -1,0 +1,21 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Infraestructure to deploy bucket s3'
+
+Parameters:
+  NameBucket:
+    Type: String
+    Default: templates-nested-challenge-final
+    Description: Name bucket that contains object nested templates
+
+Resources:
+  BucketSourceCode:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Ref NameBucket
+    DeletionPolicy: Delete
+
+Outputs:
+  BucketNameTemplates:
+    Value: !Ref NameBucket
+    Export:
+      Name: MyBucketTemplateName

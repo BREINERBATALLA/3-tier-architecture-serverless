@@ -1,0 +1,32 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Infraestructure to deploy dynamoDB table'
+
+Parameters:
+  NameTableDynamo:
+    Type: String
+    Default: products
+    Description: Name table dynamo.
+  
+Resources:    
+  DynamoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5 #Per second, Provision --- Billing mode: PROVISIONED, podria ser Pay_per_request.
+        WriteCapacityUnits: 5
+      AttributeDefinitions: 
+        - AttributeName: productId
+          AttributeType: S
+      KeySchema: ##Primary key attributes
+        - AttributeName: productId
+          KeyType: HASH
+      BillingMode: PROVISIONED 
+      TableClass: STANDARD
+      TableName: !Ref NameTableDynamo
+    DeletionPolicy: Delete
+
+Outputs:
+  TableDynamoName:
+    Value: !Ref NameTableDynamo
+    Export: 
+      Name: NameTableDynamoDB
