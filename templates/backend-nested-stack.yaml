@@ -245,7 +245,7 @@ Resources:
   CognitoUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     Properties: 
-      AccessTokenValidity: 1 ##! hours to expire, we can modify per days in tokenvalidatyUinits in apig
+      AccessTokenValidity: 2 ##! hours to expire, we can modify per days in tokenvalidatyUinits in apig
       AllowedOAuthFlows: 
         - implicit
       AllowedOAuthFlowsUserPoolClient: true #?Seguir protocolo de OAuth
