@@ -385,6 +385,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:DeleteItem
+                  - dynamodb:GetItem
                 Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NameTableDynamo}"
         - PolicyName: S3GetObjectPolicy
           PolicyDocument:
@@ -486,6 +487,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - dynamodb:UpdateItem
+                  - dynamodb:GetItem
                 Resource: !Sub "arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${NameTableDynamo}"
         - PolicyName: S3GetObjectPolicy
           PolicyDocument:
