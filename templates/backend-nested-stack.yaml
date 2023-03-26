@@ -116,8 +116,7 @@ Resources:
       RestApiId: !Ref MyRestApi
       ResourceId: !Ref MyResourceGeneral
       HttpMethod: OPTIONS
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref AuthorizerAPI
+      AuthorizationType: NONE
       Integration:
         Type: MOCK
       Integration:
