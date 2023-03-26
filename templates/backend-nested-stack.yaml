@@ -90,8 +90,7 @@ Resources:
       RestApiId: !Ref MyRestApi
       ResourceId: !Ref MyResourceId
       HttpMethod: OPTIONS
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref AuthorizerAPI
+      AuthorizationType: NONE
       Integration:
         Type: MOCK
         IntegrationResponses:
@@ -164,20 +163,6 @@ Resources:
           IntegrationHttpMethod: POST
           Type: AWS_PROXY
           Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostFunction.Arn}/invocations"
-          IntegrationResponses:
-            - StatusCode: 200
-              ResponseParameters:
-                "method.response.header.Access-Control-Allow-Origin": "'*'" 
-                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-                "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-        MethodResponses:
-          - StatusCode: 200
-            ResponseModels:
-              application/json: "Empty"
-            ResponseParameters:
-              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              "method.response.header.Access-Control-Allow-Origin": "'*'" 
 
   MyPutMethod:
     Type: AWS::ApiGateway::Method
@@ -191,20 +176,6 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutFunction.Arn}/invocations"
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              "method.response.header.Access-Control-Allow-Origin": "'*'" 
-              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'" 
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: "Empty"
-          ResponseParameters:
-            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-            "method.response.header.Access-Control-Allow-Origin": "'*'" 
 
   MyDeleteMethod:
     Type: AWS::ApiGateway::Method
@@ -218,20 +189,7 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteFunction.Arn}/invocations"
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              "method.response.header.Access-Control-Allow-Origin": "'*'" 
-              "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-      MethodResponses:
-        - StatusCode: 200
-          ResponseModels:
-            application/json: "Empty"
-          ResponseParameters:
-            "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            "method.response.header.Access-Control-Allow-Methods": "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-            "method.response.header.Access-Control-Allow-Origin": "'*'" 
+
 ################################## API AUTHORIZER ############################################
   AuthorizerAPI:
     Type: AWS::ApiGateway::Authorizer
