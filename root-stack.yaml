@@ -46,6 +46,7 @@ Resources:
       Parameters:
         NameBucketCode: !Ref NameBucketCloudFront
         NameBucketLogging: !Ref NameBucketLoggingCloudfront
+        NameBucketImagesCfn: !Ref NameBucketImagesProducts
 
   SSMParameterStack:
     Type: AWS::CloudFormation::Stack

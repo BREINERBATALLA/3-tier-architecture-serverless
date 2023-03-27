@@ -41,28 +41,6 @@ Resources:
       BucketName: !Ref NameBucket
     DeletionPolicy: Delete
       
-  BucketSourceImages:
-    Type: AWS::S3::Bucket
-    Properties: 
-      BucketName: !Ref NameBucketImages
-    DeletionPolicy: Delete
-################################## BUCKET POLICY TO GRANT FRONT GET OBJECTS BY URL ###############
-  BucketImagesPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref BucketSourceImages
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-              - 's3:GetObject'
-            Effect: Allow
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref NameBucketImages
-                - /*
-            Principal: '*'
 ############################################## RESTAPI ###################################
   MyRestApi:
     Type: AWS::ApiGateway::RestApi
