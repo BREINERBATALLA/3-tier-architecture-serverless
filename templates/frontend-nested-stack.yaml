@@ -10,32 +10,6 @@ Parameters:
     Type: String
     Default: bucketname.s3.amazonaws.com-logging-cloudfront-final-challenge
     Description: Name bucket that contains front end app  
-  NameBucketImagesCfn:
-    Type: String
-    Default: images-bucket-challenge-final-inventory
-    Description: Prefix to domain Name
-
-  BucketSourceImages:
-    Type: AWS::S3::Bucket
-    Properties: 
-      BucketName: !Ref NameBucketImagesCfn
-    DeletionPolicy: Delete
-################################## BUCKET POLICY TO GRANT FRONT GET OBJECTS BY URL ###############
-  BucketImagesPolicy:
-      Type: "AWS::S3::BucketPolicy"
-      Properties:
-          Bucket: !Ref BucketSourceImages
-          PolicyDocument:
-              Statement:
-                  - Action: "s3:GetObject"
-                    Effect: Allow
-                    Resource:
-                        - !Sub "${BucketSourceImages.Arn}"
-                        - !Sub "${BucketSourceImages.Arn}/*"
-                    Principal:
-                        CanonicalUser: !GetAtt OriginAccessIdentityCF.S3CanonicalUserId
-
-##############################################################################################
 
 Resources:
   BucketSourceCode:
@@ -94,17 +68,6 @@ Resources:
           AllowedMethods: 
                   - GET
                   - HEAD
-        CacheBehaviors:
-          - PathPattern: /imagenes/*
-            TargetOriginId: origins4
-            ViewerProtocolPolicy: redirect-to-https
-            ForwardedValues:
-              Cookies:
-                Forward: none
-              QueryString: false          
-            AllowedMethods: 
-              - GET
-              - HEAD
         Logging:
           Bucket: !Sub '${NameBucketLogging}.s3.amazonaws.com'
           IncludeCookies: true
@@ -114,10 +77,6 @@ Resources:
               Id: origins3
               S3OriginConfig: 
                   OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentityCF}
-            - DomainName: !GetAtt BucketSourceImages.DomainName
-              Id: origins4
-              S3OriginConfig: 
-                OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentityCF} 
         WebACLId: !GetAtt WebACLProtection.Arn
         Enabled: true
         PriceClass: PriceClass_100
