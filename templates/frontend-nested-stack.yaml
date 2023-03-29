@@ -95,6 +95,15 @@ Resources:
             DefaultTTL: 3600
             MaxTTL: 86400
             MinTTL: 3600        
+        CustomErrorResponses:
+          - ErrorCode: 400
+            ResponsePagePath: /index.html
+            ResponseCode: 200
+            ErrorCachingMinTTL: 300
+          - ErrorCode: 403
+            ResponsePagePath: /index.html
+            ResponseCode: 200
+            ErrorCachingMinTTL: 300
 
   BucketPolicyOAI:
       Type: "AWS::S3::BucketPolicy"
