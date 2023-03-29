@@ -80,6 +80,21 @@ Resources:
         WebACLId: !GetAtt WebACLProtection.Arn
         Enabled: true
         PriceClass: PriceClass_100
+        CacheBehaviors:
+          - PathPattern: /products
+            TargetOriginId: origins3
+            ViewerProtocolPolicy: redirect-to-https
+            ForwardedValues:
+              Cookies:
+                Forward: none
+              QueryString: false
+            AllowedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            DefaultTTL: 3600
+            MaxTTL: 86400
+            MinTTL: 3600        
 
   BucketPolicyOAI:
       Type: "AWS::S3::BucketPolicy"
