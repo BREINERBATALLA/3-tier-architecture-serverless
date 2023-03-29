@@ -40,29 +40,77 @@ Resources:
     Properties: 
       BucketName: !Ref NameBucket
     DeletionPolicy: Delete
-      
+############################################ CLOUDFRONT- BUCKET IMAGES CONFIGURATION ###############################      
   BucketSourceImages:
     Type: AWS::S3::Bucket
     Properties: 
       BucketName: !Ref NameBucketImages
     DeletionPolicy: Delete
-################################## BUCKET POLICY TO GRANT FRONT GET OBJECTS BY URL ###############
-  BucketImagesPolicy:
-    Type: AWS::S3::BucketPolicy
+
+  BucketPolicyOAI:
+      Type: "AWS::S3::BucketPolicy"
+      Properties:
+          Bucket: !Ref BucketSourceImages
+          PolicyDocument:
+              Statement:
+                  - Action: "s3:GetObject"
+                    Effect: Allow
+                    Resource:
+                        - !Sub "${BucketSourceImages.Arn}"
+                        - !Sub "${BucketSourceImages.Arn}/*"
+                    Principal:
+                        CanonicalUser: !GetAtt OriginAccessIdentityCFImages.S3CanonicalUserId
+    
+  OriginAccessIdentityCFImages:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    DependsOn: BucketSourceImages
+    Properties: 
+      CloudFrontOriginAccessIdentityConfig: 
+        Comment: !Ref BucketSourceImages
+
+
+  CloudfrontDistributionImages:
+    Type: AWS::CloudFront::Distribution
+    DependsOn: BucketSourceImages
     Properties:
-      Bucket: !Ref BucketSourceImages
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Action:
-              - 's3:GetObject'
-            Effect: Allow
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref NameBucketImages
-                - /*
-            Principal: '*'
+      DistributionConfig:
+        DefaultRootObject: index.html  
+        HttpVersion: http2 
+        DefaultCacheBehavior:
+          TargetOriginId: origins3
+          ViewerProtocolPolicy: redirect-to-https
+          ForwardedValues:
+              Cookies:
+                  Forward: none
+              QueryString: false          
+          AllowedMethods: 
+                  - GET
+                  - HEAD
+        Origins:
+            - DomainName: !GetAtt BucketSourceImages.DomainName
+              Id: origins3
+              S3OriginConfig: 
+                  OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentityCFImages}
+        WebACLId: !ImportValue WebAclARN
+        Enabled: true
+        PriceClass: PriceClass_100
+################################## BUCKET POLICY TO GRANT FRONT GET OBJECTS BY URL ###############
+#  BucketImagesPolicy:
+#    Type: AWS::S3::BucketPolicy
+#    Properties:
+#      Bucket: !Ref BucketSourceImages
+#      PolicyDocument:
+#        Version: 2012-10-17
+#        Statement:
+#          - Action:
+#             - 's3:GetObject'
+#            Effect: Allow
+#           Resource: !Join
+#             - ''
+#             - - 'arn:aws:s3:::'
+#               - !Ref NameBucketImages
+#               - /*
+#           Principal: '*'
 ############################################## RESTAPI ###################################
   MyRestApi:
     Type: AWS::ApiGateway::RestApi
@@ -347,6 +395,7 @@ Resources:
         Variables:
           TABLE_NAME: !Ref NameTableDynamo
           BUCKET_IMAGES: !Ref NameBucketImages
+#         CLOUDFRONT_ID: !ImportValue Cloudfront-Fronted-DistributionId
       Timeout: 10  
       #LambdaExecutionRole  
 ############################################## ROLES LAMBDA ###################################

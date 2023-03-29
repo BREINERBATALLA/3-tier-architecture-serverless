@@ -186,3 +186,12 @@ Outputs:
     Description: Endpoint cloudfront
     Export:
       Name: CloudFrontUrl  
+  WebALCArn:
+    Value: !GetAtt WebACLProtection.Arn
+    Description: WebALC ARN 
+    Export:
+      Name: WebAclARN
+  CloudFrontId:
+    Value: !Ref CloudfrontDistribution
+    Export:
+      Name: Cloudfront-Fronted-DistributionId
