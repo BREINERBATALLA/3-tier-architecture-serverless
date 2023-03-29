@@ -69,7 +69,8 @@ Resources:
         PostFunctionName: !GetAtt BackendStack.Outputs.LambdaPostName
         GetFunctionName: !GetAtt BackendStack.Outputs.LambdaGetName
         HostedUIUrl: !GetAtt BackendStack.Outputs.HostedUIURL
-        NameBucketImages: !Ref NameBucketImagesProducts 
+#        NameBucketImages: !Ref NameBucketImagesProducts 
+        CloudFrontUrlImages: !GetAtt BackendStack.Outputs.CloudFrontUrlImages
 
         
 

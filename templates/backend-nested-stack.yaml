@@ -684,6 +684,11 @@ Outputs:
       - https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?response_type=token&client_id=${CognitoUserPoolClient}&redirect_uri=https://${callbackUrl}
       - callbackUrl: !ImportValue CloudFrontUrl
     Description: HostedUI url
-  NameBucketImages:
-    Value: !Ref NameBucketImages
-    Description: Name bucket images
+#  NameBucketImages:
+#    Value: !Ref NameBucketImages
+#    Description: Name bucket images
+  CloudFrontUrlImages:
+    Value: !GetAtt CloudfrontDistributionImages.DomainName
+    Description: Endpoint cloudfront images
+    Export:
+      Name: CloudFrontUrlImages

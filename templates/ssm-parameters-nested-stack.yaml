@@ -35,7 +35,9 @@ Parameters:
   HostedUIUrl:
     Type: String
   
-  NameBucketImages:
+#  NameBucketImages:
+#    Type: String
+  CloudFrontUrlImages:
     Type: String
 
 
@@ -47,12 +49,18 @@ Resources:
       Value: !Ref NameBucketCode
       Name: BucketNameCode
 
-  NameBucketImageSsmParameter:
+#  NameBucketImageSsmParameter:
+#    Type: AWS::SSM::Parameter
+#    Properties: 
+#      Type: String 
+#     Value: !Ref NameBucketImages
+#      Name: BucketNameImages
+  CloudFrontUrlImages:
     Type: AWS::SSM::Parameter
     Properties: 
       Type: String 
-      Value: !Ref NameBucketImages
-      Name: BucketNameImages
+      Value: !Ref CloudFrontUrlImages
+      Name: CloudFrontUrlImages
   
   UrlHostedSsmParameter:
     Type: AWS::SSM::Parameter
