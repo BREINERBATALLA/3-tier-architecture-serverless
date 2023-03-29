@@ -305,7 +305,7 @@ Resources:
       AuthSessionValidity: 15 ##Tiempo para que la api responda, o se expira la sesion token
       CallbackURLs: 
         - !Sub 
-          - 'https://${UrlCloudFront}'
+          - 'https://${UrlCloudFront}/products'
           - UrlCloudFront: !ImportValue CloudFrontUrl
         #!ImportValue cloudfronturl
       ClientName: user-pool-client-name-final-challenge
