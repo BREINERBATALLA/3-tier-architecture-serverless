@@ -74,7 +74,6 @@ Resources:
     DependsOn: BucketSourceImages
     Properties:
       DistributionConfig:
-        DefaultRootObject: index.html  
         HttpVersion: http2 
         DefaultCacheBehavior:
           TargetOriginId: origins3
