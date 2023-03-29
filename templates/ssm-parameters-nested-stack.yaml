@@ -55,7 +55,7 @@ Resources:
 #      Type: String 
 #     Value: !Ref NameBucketImages
 #      Name: BucketNameImages
-  CloudFrontUrlImages:
+  CloudFrontUrlImagesProducts:
     Type: AWS::SSM::Parameter
     Properties: 
       Type: String 

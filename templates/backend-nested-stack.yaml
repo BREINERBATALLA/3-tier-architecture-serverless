@@ -687,7 +687,7 @@ Outputs:
 #  NameBucketImages:
 #    Value: !Ref NameBucketImages
 #    Description: Name bucket images
-  CloudFrontUrlImages:
+  CloudFrontUrlProductImages:
     Value: !GetAtt CloudfrontDistributionImages.DomainName
     Description: Endpoint cloudfront images
     Export:
