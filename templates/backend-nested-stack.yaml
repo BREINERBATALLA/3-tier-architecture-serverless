@@ -116,6 +116,7 @@ Resources:
     Properties: 
       Description: Rest Api for get and create task that will be persistence in a dynaomodb table throught lambda functions
       Name: ChallengeApi
+      TracingEnabled: true
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
     Type: AWS::ApiGateway::Resource
@@ -155,6 +156,7 @@ Resources:
             "method.response.header.Access-Control-Allow-Headers": true
             "method.response.header.Access-Control-Allow-Methods": true
             "method.response.header.Access-Control-Allow-Origin": true
+
 
   OptionGeneralResource:
     Type: AWS::ApiGateway::Method
@@ -197,6 +199,7 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAllFunction.Arn}/invocations"
+      TracingEnabled: true
 
   MyPostMethod:
       Type: AWS::ApiGateway::Method
@@ -210,6 +213,7 @@ Resources:
           IntegrationHttpMethod: POST
           Type: AWS_PROXY
           Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostFunction.Arn}/invocations"
+        TracingEnabled: true
 
   MyPutMethod:
     Type: AWS::ApiGateway::Method
@@ -223,6 +227,7 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutFunction.Arn}/invocations"
+      TracingEnabled: true
 
   MyDeleteMethod:
     Type: AWS::ApiGateway::Method
@@ -236,7 +241,8 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteFunction.Arn}/invocations"
-
+      TracingEnabled: true
+      
 ################################## API AUTHORIZER ############################################
   AuthorizerAPI:
     Type: AWS::ApiGateway::Authorizer
@@ -347,6 +353,8 @@ Resources:
           TABLE_NAME: !Ref NameTableDynamo
           BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10
+      TracingConfig:
+        Mode: Active
 
   DeleteFunction:
     Type: AWS::Lambda::Function
@@ -363,6 +371,8 @@ Resources:
           TABLE_NAME: !Ref NameTableDynamo
           BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10
+      TracingConfig: ##X-Ray
+        Mode: Active
 
   PutFunction:
     Type: AWS::Lambda::Function
@@ -379,6 +389,8 @@ Resources:
           TABLE_NAME: !Ref NameTableDynamo
           BUCKET_IMAGES: !Ref NameBucketImages
       Timeout: 10
+      TracingConfig:
+        Mode: Active
 
   PostFunction:
     Type: AWS::Lambda::Function
@@ -394,9 +406,10 @@ Resources:
         Variables:
           TABLE_NAME: !Ref NameTableDynamo
           BUCKET_IMAGES: !Ref NameBucketImages
-#         CLOUDFRONT_ID: !ImportValue Cloudfront-Fronted-DistributionId
       Timeout: 10  
-      #LambdaExecutionRole  
+      TracingConfig:
+        Mode: Active
+
 ############################################## ROLES LAMBDA ###################################
   DynamoAndExecutionRoleGet:
     Type: "AWS::IAM::Role"
