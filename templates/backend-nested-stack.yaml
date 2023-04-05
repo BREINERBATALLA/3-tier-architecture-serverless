@@ -261,8 +261,11 @@ Resources:
     Type: AWS::WAFv2::WebACLAssociation
     Properties: 
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/${Stage}'
-      WebACLArn: !ImportValue WebACLId
-
+      WebACLArn: 
+        - !Sub 
+          - 'arn:aws:wafv2:${AWS::Region}:${AWS::AccountId}:global/webacl/{webaclID}'
+          - webaclID: !ImportValue WebACLId
+          
 
 ############################################# COGNITO USER POOL ###################################
   CognitoUserPool:  
