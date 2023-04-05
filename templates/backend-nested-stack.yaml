@@ -257,6 +257,47 @@ Resources:
       RestApiId: !Ref MyRestApi
       Type: COGNITO_USER_POOLS
 
+############################################ WEBACL PROTECT API AGAINS CROSS SCRIPTING######################
+
+  WebAclApiGatewayAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn: WebACLProtectionapiGateway 
+    Properties: 
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/${Stage}'
+      WebACLArn: !GetAtt WebACLProtectionapiGateway.Arn
+
+  WebACLProtectionapiGateway:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: WebACLProtection
+      Scope: REGIONAL
+      DefaultAction: ##si no se cumplen las reglas, permite el acceso {} todos
+        Allow: {}
+      VisibilityConfig: 
+        CloudWatchMetricsEnabled: true
+        MetricName: AccesoDefault
+        SampledRequestsEnabled: true
+      Description: "Protects against SQL injection attacks"
+      Rules:
+        - Name: AWS-AWSManagedRulesCommonRuleSet
+          Priority: 2
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesCommonRuleSet
+              RuleActionOverrides:
+              - ActionToUse:
+                  Count: {}
+                Name: NoUserAgent_HEADER
+              ExcludedRules: []
+          OverrideAction:
+            None: {}
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesCommonRuleSet    
+
+############################################ WEBACL PROTECT API AGAINS CROSS SCRIPTING######################
 
 ############################################# COGNITO USER POOL ###################################
   CognitoUserPool:  
