@@ -260,7 +260,7 @@ Resources:
   WebAclApiGatewayAssociation:
     Type: AWS::WAFv2::WebACLAssociation
     Properties: 
-      ResourceArn: !Sub 'arn:aws:apigateway:region::/{MyRestApi}/stages/${Stage}'
+      ResourceArn: !Sub 'arn:aws:apigateway:{AWS::Region}::/{MyRestApi}/stages/${Stage}'
       WebACLArn: !ImportValue WebAclARN
 
 
