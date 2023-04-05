@@ -215,6 +215,11 @@ Outputs:
     Description: WebALC ARN 
     Export:
       Name: WebAclARN
+  webACLId:
+    Value: !Ref WebACLProtection
+    Description: WebACL Id
+    Export:
+      Name: WebACLId
   CloudFrontId:
     Value: !Ref CloudfrontDistribution
     Export:
