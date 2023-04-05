@@ -130,7 +130,7 @@ Resources:
         CloudWatchMetricsEnabled: true
         MetricName: AccesoDefault
         SampledRequestsEnabled: true
-      Description: "Protects against SQL injection attacks"
+      Description: "Protects against SQL injection attacks and Cross Scripting"
       Rules:
         - Name: SqlInjectionRule
           Priority: 1
@@ -215,7 +215,6 @@ Outputs:
     Description: WebALC ARN 
     Export:
       Name: WebAclARN
-    
   CloudFrontId:
     Value: !Ref CloudfrontDistribution
     Export:
