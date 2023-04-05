@@ -257,6 +257,13 @@ Resources:
       RestApiId: !Ref MyRestApi
       Type: COGNITO_USER_POOLS
 
+  WebAclApiGatewayAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    Properties: 
+      ResourceArn: !Sub 'arn:aws:apigateway:region::/{MyRestApi}/stages/${Stage}'
+      WebACLArn: !ImportValue WebAclARN
+
+
 ############################################# COGNITO USER POOL ###################################
   CognitoUserPool:  
     Type: AWS::Cognito::UserPool
