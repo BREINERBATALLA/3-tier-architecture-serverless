@@ -462,7 +462,17 @@ Resources:
               Action:
                 - s3:PutObject
                 - s3:DeleteObject
-              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/* 
+        - PolicyName: XRayPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: XRayPermissions
+                Effect: Allow
+                Action:
+                  - "xray:PutTraceSegments"
+                  - "xray:PutTelemetryRecords"
+                Resource: "*"   
 
   DynamoAndExecutionRoleDelete:
     Type: "AWS::IAM::Role"
@@ -513,7 +523,17 @@ Resources:
               Action:
                 - s3:PutObject
                 - s3:DeleteObject
-              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*        
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*
+        - PolicyName: XRayPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: XRayPermissions
+                Effect: Allow
+                Action:
+                  - "xray:PutTraceSegments"
+                  - "xray:PutTelemetryRecords"
+                Resource: "*"        
 
 
   DynamoAndExecutionRolePost:
@@ -564,7 +584,17 @@ Resources:
               Action:
                 - s3:PutObject
                 - s3:DeleteObject
-              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*
+        - PolicyName: XRayPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: XRayPermissions
+                Effect: Allow
+                Action:
+                  - "xray:PutTraceSegments"
+                  - "xray:PutTelemetryRecords"
+                Resource: "*"    
 
   DynamoAndExecutionRoleUpdate:
     Type: "AWS::IAM::Role"
@@ -615,7 +645,17 @@ Resources:
               Action:
                 - s3:PutObject
                 - s3:DeleteObject
-              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*    
+              Resource: !Sub arn:aws:s3:::${NameBucketImages}/*
+        - PolicyName: XRayPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: XRayPermissions
+                Effect: Allow
+                Action:
+                  - "xray:PutTraceSegments"
+                  - "xray:PutTelemetryRecords"
+                Resource: "*"    
 ############################################## STAGE API ###################################
 
   LambdaApiGatewayStage:
