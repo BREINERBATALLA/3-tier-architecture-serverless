@@ -358,7 +358,6 @@ Resources:
                   TextTransformation:
                     Priority: 0
                     Type: NONE
-                  Text: ""
                 - ByteMatchStatement:
                     FieldToMatch:
                       QueryString: {}
@@ -369,7 +368,6 @@ Resources:
                   TextTransformation:
                     Priority: 0
                     Type: NONE
-                  Text: ""
                 - ByteMatchStatement:
                     FieldToMatch:
                       SingleHeader:
@@ -381,7 +379,6 @@ Resources:
                   TextTransformation:
                     Priority: 0
                     Type: NONE
-                  Text: ""
                 - ByteMatchStatement:
                     FieldToMatch:
                       Body: {}
@@ -392,7 +389,6 @@ Resources:
                   TextTransformation:
                     Priority: 0
                     Type: NONE
-                  Text: ""
           VisibilityConfig:
             SampledRequestsEnabled: true
           OverrideAction:
