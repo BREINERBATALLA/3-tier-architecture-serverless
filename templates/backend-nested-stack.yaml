@@ -353,46 +353,39 @@ Resources:
                       UriPath: {}
                     TextTransformations:
                       - Type: LOWERCASE
+                        Priority: 0
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                  TextTransformation:
-                    Priority: 0
-                    Type: NONE
                 - ByteMatchStatement:
                     FieldToMatch:
                       QueryString: {}
                     TextTransformations:
                       - Type: LOWERCASE
+                        Priority: 0
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                  TextTransformation:
-                    Priority: 0
-                    Type: NONE
                 - ByteMatchStatement:
                     FieldToMatch:
                       SingleHeader:
                         Name: Cookie
                     TextTransformations:
                       - Type: LOWERCASE
+                        Priority: 0
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                  TextTransformation:
-                    Priority: 0
-                    Type: NONE
                 - ByteMatchStatement:
                     FieldToMatch:
                       Body: {}
                     TextTransformations:
                       - Type: LOWERCASE
+                        Priority: 0
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                  TextTransformation:
-                    Priority: 0
-                    Type: NONE
           VisibilityConfig:
             SampledRequestsEnabled: true
           OverrideAction:
             Block: {}
+
 
 
   WebAclApiGatewayAssociation:
