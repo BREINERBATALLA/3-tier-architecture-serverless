@@ -136,9 +136,7 @@ Resources:
   Account:
     Type: 'AWS::ApiGateway::Account'
     Properties:
-      CloudWatchRoleArn: !GetAtt 
-        - CloudWatchRole
-        - Arn
+      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
 
 ############################################## DEPLOY API ###################################
   GatewayDeploy:
