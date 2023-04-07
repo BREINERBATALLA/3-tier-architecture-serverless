@@ -355,7 +355,6 @@ Resources:
                       - Type: LOWERCASE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                    FieldContentType: TEXT_HTML
                   TextTransformation:
                     Priority: 0
                     Type: NONE
@@ -367,7 +366,6 @@ Resources:
                       - Type: LOWERCASE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                    FieldContentType: TEXT_HTML
                   TextTransformation:
                     Priority: 0
                     Type: NONE
@@ -380,7 +378,6 @@ Resources:
                       - Type: LOWERCASE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                    FieldContentType: TEXT_HTML
                   TextTransformation:
                     Priority: 0
                     Type: NONE
@@ -392,7 +389,6 @@ Resources:
                       - Type: LOWERCASE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-                    FieldContentType: TEXT_HTML
                   TextTransformation:
                     Priority: 0
                     Type: NONE
@@ -401,6 +397,7 @@ Resources:
             SampledRequestsEnabled: true
           OverrideAction:
             Block: {}
+
 
   WebAclApiGatewayAssociation:
     Type: AWS::WAFv2::WebACLAssociation
