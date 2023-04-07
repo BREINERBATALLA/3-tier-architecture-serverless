@@ -120,7 +120,7 @@ Resources:
     Properties:
       LogGroupName: /aws/api-gateway/MyRestApiLogs
 
-  CloudWatchRole:
+  CloudWatchRoleApi:
     Type: AWS::IAM::Role
     Properties:
       Description: Allows the API to log errors to CloudWatch Logs
@@ -140,7 +140,7 @@ Resources:
   Account:
     Type: 'AWS::ApiGateway::Account'
     Properties:
-      CloudWatchRoleArn: !GetAtt CloudWatchRole.Arn
+      CloudWatchRoleArn: !GetAtt CloudWatchRoleApi.Arn
 
 ############################################## DEPLOY API ###################################
   GatewayDeploy:
