@@ -113,6 +113,7 @@ Resources:
 ############################################## DEPLOY API ###################################
   GatewayDeploy:
     Type: AWS::ApiGateway::Deployment
+    DependsOn: MyGetAllMethod
     Properties:
       RestApiId: !Ref MyRestApi
 
