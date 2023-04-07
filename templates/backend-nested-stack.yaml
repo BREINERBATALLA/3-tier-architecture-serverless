@@ -97,7 +97,7 @@ Resources:
   MyRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties: 
-      Description: Rest Api for get and create task that will be persistence in a dynaomodb table throught lambda functions
+      Description: Rest Api for get and create task that will be persistenc in a dynaomodb table throught lambda functions
       Name: ChallengeApi
 
 ############################################## STAGE API ###################################
@@ -147,6 +147,7 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref MyRestApi
+
         
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
