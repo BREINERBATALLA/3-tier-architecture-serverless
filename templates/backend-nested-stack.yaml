@@ -102,7 +102,7 @@ Resources:
 
 ############################################## STAGE API ###################################
   LambdaApiGatewayStage:
-    Type: AWS::ApiGateway::Stage ##Define publicación de la api gateway
+    Type: AWS::ApiGateway::Stage ##Define publicación de la api
     DependsOn: ApiGatewayLogGroup
     Properties:
       DeploymentId: !Ref GatewayDeploy
