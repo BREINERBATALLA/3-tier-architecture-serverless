@@ -344,13 +344,17 @@ Resources:
         Allow: {}
       VisibilityConfig:
         CloudWatchMetricsEnabled: true
-        MetricName: ExampleWebACLMetricApig
+        MetricName: AccesoDefaultXSSMetric
         SampledRequestsEnabled: true
       Rules:
         - Name: CrossSiteScriptingRule
           Priority: 1
           Action:
             Block: {}
+          VisibilityConfig: ##cloudwatch
+            CloudWatchMetricsEnabled: true
+            MetricName: CrossSiteScriptingMetric
+            SampledRequestsEnabled: true
           Statement:
             OrStatement:
               Statements:
