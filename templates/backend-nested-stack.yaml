@@ -335,6 +335,79 @@ Resources:
       UserPoolId: !Ref CognitoUserPool 
       Domain: !Ref Prefix
 
+  WebACLApiGateway:
+    Type: AWS::WAFv2::WebACL
+    Properties:
+      Name: MyWebACL
+      Scope: REGIONAL
+      DefaultAction:
+        Block: {}
+      Rules:
+        - Name: CrossSiteScriptingRule
+          Priority: 1
+          Statement:
+            OrStatement:
+              Statements:
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      UriPath: {}
+                    TextTransformations:
+                      - Type: LOWERCASE
+                    PositionalConstraint: CONTAINS
+                    SearchString: "<script>"
+                    FieldContentType: TEXT_HTML
+                  TextTransformation:
+                    Priority: 0
+                    Type: NONE
+                  Text: ""
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      QueryString: {}
+                    TextTransformations:
+                      - Type: LOWERCASE
+                    PositionalConstraint: CONTAINS
+                    SearchString: "<script>"
+                    FieldContentType: TEXT_HTML
+                  TextTransformation:
+                    Priority: 0
+                    Type: NONE
+                  Text: ""
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      SingleHeader:
+                        Name: Cookie
+                    TextTransformations:
+                      - Type: LOWERCASE
+                    PositionalConstraint: CONTAINS
+                    SearchString: "<script>"
+                    FieldContentType: TEXT_HTML
+                  TextTransformation:
+                    Priority: 0
+                    Type: NONE
+                  Text: ""
+                - ByteMatchStatement:
+                    FieldToMatch:
+                      Body: {}
+                    TextTransformations:
+                      - Type: LOWERCASE
+                    PositionalConstraint: CONTAINS
+                    SearchString: "<script>"
+                    FieldContentType: TEXT_HTML
+                  TextTransformation:
+                    Priority: 0
+                    Type: NONE
+                  Text: ""
+          VisibilityConfig:
+            SampledRequestsEnabled: true
+          OverrideAction:
+            Block: {}
+
+  WebAclApiGatewayAssociation:
+    Type: AWS::WAFv2::WebACLAssociation
+    DependsOn: WebACLProtectionapiGateway 
+    Properties: 
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/${Stage}'
+      WebACLArn: !GetAtt WebACLApiGateway.Arn
 
 ############################################## FUNCIONES LAMBDA ###################################
 
