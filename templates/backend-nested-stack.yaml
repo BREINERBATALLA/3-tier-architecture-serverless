@@ -109,7 +109,7 @@ Resources:
       RestApiId: !Ref MyRestApi
       StageName: !Ref Stage
       TracingEnabled: true
-      AccessLoggingSetting:
+      AccessLogSetting:
         DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
         Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "method": "$context.httpMethod", "resourcePath": "$context.resourcePath", "status": "$context.status", "responseLength": "$context.responseLength" }'
 
