@@ -406,8 +406,8 @@ Resources:
     Type: AWS::WAFv2::WebACLAssociation
     DependsOn: WebACLApiGateway 
     Properties: 
-      ResourceArn: !Sub 'arn:aws:apigateway:us-east-1::/apis/${MyRestApi}/stages/${Stage}'
-      WebACLArn: !GetAtt WebACLApiGateway.Arn
+      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/${Stage}'
+      WebACLArn: !Ref WebACLApiGateway
 
 ############################################## FUNCIONES LAMBDA ###################################
 
