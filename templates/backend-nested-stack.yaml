@@ -383,8 +383,6 @@ Resources:
                     SearchString: "<script>"
           VisibilityConfig:
             SampledRequestsEnabled: true
-          OverrideAction:
-            Block: {}
 
 
 
