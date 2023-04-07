@@ -99,15 +99,31 @@ Resources:
     Properties: 
       Description: Rest Api for get and create task that will be persistence in a dynaomodb table throught lambda functions
       Name: ChallengeApi
+
+############################################## STAGE API ###################################
+  LambdaApiGatewayStage:
+    Type: AWS::ApiGateway::Stage ##Define publicación de la api
+    Properties:
+      DeploymentId: !Ref gatewayDeploy
+      Description: Lambda API Stage v0
+      RestApiId: !Ref MyRestApi
+      StageName: !Ref Stage
+      TracingEnabled: true
       AccessLoggingSetting:
         DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
         Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "method": "$context.httpMethod", "resourcePath": "$context.resourcePath", "status": "$context.status", "responseLength": "$context.responseLength" }'
-        LoggingLevel: INFO #Relevant info about how api works.
 
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: /aws/api-gateway/MyRestApiLogs
+############################################## DEPLOY API ###################################
+  GatewayDeploy:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+      - MyGetAllMethod
+    Properties:
+      RestApiId: !Ref MyRestApi
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
     Type: AWS::ApiGateway::Resource
@@ -147,7 +163,6 @@ Resources:
             "method.response.header.Access-Control-Allow-Headers": true
             "method.response.header.Access-Control-Allow-Methods": true
             "method.response.header.Access-Control-Allow-Origin": true
-
 
   OptionGeneralResource:
     Type: AWS::ApiGateway::Method
@@ -205,7 +220,6 @@ Resources:
           Type: AWS_PROXY
           Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PostFunction.Arn}/invocations"
 
-
   MyPutMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -219,7 +233,6 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${PutFunction.Arn}/invocations"
 
-
   MyDeleteMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -232,7 +245,6 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DeleteFunction.Arn}/invocations"
-
 
 ################################## API AUTHORIZER ############################################
   AuthorizerAPI:
@@ -717,16 +729,7 @@ Resources:
                   - "xray:PutTraceSegments"
                   - "xray:PutTelemetryRecords"
                 Resource: "*"    
-############################################## STAGE API ###################################
 
-  LambdaApiGatewayStage:
-    Type: AWS::ApiGateway::Stage ##Define publicación de la api
-    Properties:
-      DeploymentId: !Ref gatewayDeploy
-      Description: Lambda API Stage v0
-      RestApiId: !Ref MyRestApi
-      StageName: !Ref Stage
-      TracingEnabled: true
 ############################################## PERMISSIONS LAMBDA ###################################
 
   lambdaApiGatewayInvokeGetAll: #Le concede permisos a un servicio de aws para usar una función lambda.
@@ -756,14 +759,6 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt PostFunction.Arn
       Principal: apigateway.amazonaws.com
-############################################## DEPLOY API ###################################
-
-  gatewayDeploy:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - MyGetAllMethod
-    Properties:
-      RestApiId: !Ref MyRestApi
 ############################################## OUTPUTS ###################################
   
 Outputs:
