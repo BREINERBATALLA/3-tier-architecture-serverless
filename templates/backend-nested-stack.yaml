@@ -103,12 +103,16 @@ Resources:
 ############################################## STAGE API ###################################
   LambdaApiGatewayStage:
     Type: AWS::ApiGateway::Stage ##Define publicación de la api
+    DependsOn: ApiGatewayLogGroup
     Properties:
       DeploymentId: !Ref GatewayDeploy
       Description: Lambda API Stage v0
       RestApiId: !Ref MyRestApi
       StageName: !Ref Stage
       TracingEnabled: true
+      AccessLogSetting:
+          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+          Format: '{ "requestId": "$context.requestId", "path": "$context.path", "requestTime": "$context.requestTime", "httpMethod": "$context.httpMethod","statusCode": "$context.status", "errorMessage": "$context.error.message" }'
 
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
@@ -141,15 +145,9 @@ Resources:
 ############################################## DEPLOY API ###################################
   GatewayDeploy:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: ApiGatewayLogGroup
     Properties:
       RestApiId: !Ref MyRestApi
-      StageName: prueba
-      StageDescription:
-        LoggingLevel: INFO
-        AccessLogSetting:
-          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-          Format: '{ "requestId": "$context.requestId", "path": "$context.path", "requestTime": "$context.requestTime", "httpMethod": "$context.httpMethod","statusCode": "$context.status", "errorMessage": "$context.error.message" }'
+        
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
     Type: AWS::ApiGateway::Resource
