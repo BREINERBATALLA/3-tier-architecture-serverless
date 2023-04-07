@@ -341,10 +341,16 @@ Resources:
       Name: MyWebACL
       Scope: REGIONAL
       DefaultAction:
-        Block: {}
+        Allow: {}
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: ExampleWebACLMetricApig
+        SampledRequestsEnabled: true
       Rules:
         - Name: CrossSiteScriptingRule
           Priority: 1
+          Action:
+            Block: {}
           Statement:
             OrStatement:
               Statements:
@@ -381,8 +387,7 @@ Resources:
                         Priority: 0
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-          VisibilityConfig:
-            SampledRequestsEnabled: true
+
 
 
 
