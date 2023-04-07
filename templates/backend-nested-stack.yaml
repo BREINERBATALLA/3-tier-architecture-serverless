@@ -93,30 +93,21 @@ Resources:
         WebACLId: !ImportValue WebAclARN
         Enabled: true
         PriceClass: PriceClass_100
-################################## BUCKET POLICY TO GRANT FRONT GET OBJECTS BY URL ###############
-#  BucketImagesPolicy:
-#    Type: AWS::S3::BucketPolicy
-#    Properties:
-#      Bucket: !Ref BucketSourceImages
-#      PolicyDocument:
-#        Version: 2012-10-17
-#        Statement:
-#          - Action:
-#             - 's3:GetObject'
-#            Effect: Allow
-#           Resource: !Join
-#             - ''
-#             - - 'arn:aws:s3:::'
-#               - !Ref NameBucketImages
-#               - /*
-#           Principal: '*'
 ############################################## RESTAPI ###################################
   MyRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties: 
       Description: Rest Api for get and create task that will be persistence in a dynaomodb table throught lambda functions
       Name: ChallengeApi
+      AccessLoggingSetting:
+        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "method": "$context.httpMethod", "resourcePath": "$context.resourcePath", "status": "$context.status", "responseLength": "$context.responseLength" }'
+        LoggingLevel: INFO #Relevant info about how api works.
 
+  ApiGatewayLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /aws/api-gateway/MyRestApiLogs
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
     Type: AWS::ApiGateway::Resource
@@ -484,7 +475,6 @@ Resources:
 ############################################## ROLES LAMBDA ###################################
   DynamoAndExecutionRoleGet:
     Type: "AWS::IAM::Role"
-    ##Maybe need dependsOn bucket, but object?
     Properties:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -809,9 +799,6 @@ Outputs:
       - https://${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com/login?response_type=token&client_id=${CognitoUserPoolClient}&redirect_uri=https://${callbackUrl}
       - callbackUrl: !ImportValue CloudFrontUrl
     Description: HostedUI url
-#  NameBucketImages:
-#    Value: !Ref NameBucketImages
-#    Description: Name bucket images
   CloudFrontUrlProductImages:
     Value: !GetAtt CloudfrontDistributionImages.DomainName
     Description: Endpoint cloudfront images

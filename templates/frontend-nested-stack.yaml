@@ -132,43 +132,6 @@ Resources:
         SampledRequestsEnabled: true
       Description: "Protects against SQL injection attacks and Cross Scripting"
       Rules:
-        - Name: SqlInjectionRule
-          Priority: 1
-          Action:
-            Block: {}
-          VisibilityConfig: ##cloudwatch
-            CloudWatchMetricsEnabled: true
-            MetricName: SqlInjectionRule
-            SampledRequestsEnabled: true
-          Statement:
-            OrStatement:
-              Statements:
-                - ByteMatchStatement:
-                    FieldToMatch: ##bloquear solicitudes que contengan caracteres usados en sql injection
-                      SingleHeader:
-                        Name: "User-Agent"
-                    TextTransformations:
-                      - Type: COMPRESS_WHITE_SPACE
-                        Priority: 2
-                      - Type: HTML_ENTITY_DECODE
-                        Priority: 3
-                      - Type: LOWERCASE
-                        Priority: 1
-                    PositionalConstraint: CONTAINS
-                    SearchString: "'|\"|;|:|<|>|=|{" 
-                - ByteMatchStatement:  ##ByMachStatement con sus searchStrings..
-                    FieldToMatch:
-                      SingleHeader:
-                        Name: "User-Agent" ##Encabezado para identificar el software del cliente que realiza la solicitud.  Ayuda a identificar solitidues malintencionadas. Se compara el valor de este header con las expresiones para detectar ataques de inyeccion sql
-                    TextTransformations:
-                      - Type: COMPRESS_WHITE_SPACE
-                        Priority: 2
-                      - Type: HTML_ENTITY_DECODE
-                        Priority: 3
-                      - Type: LOWERCASE
-                        Priority: 1
-                    PositionalConstraint: CONTAINS
-                    SearchString: "\\b(select|update|insert|delete|drop|alter|create|truncate)\\b"
         - Name: AWS-AWSManagedRulesCommonRuleSet
           Priority: 2
           Statement:
