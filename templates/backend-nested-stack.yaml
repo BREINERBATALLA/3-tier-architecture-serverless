@@ -362,16 +362,20 @@ Resources:
                     FieldToMatch:
                       UriPath: {}
                     TextTransformations:
-                      - Type: LOWERCASE
-                        Priority: 0
+                      - Priority: 1
+                        Type: URL_DECODE
+                      - Priority: 2
+                        Type: HTML_ENTITY_DECODE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
                 - ByteMatchStatement:
                     FieldToMatch:
                       QueryString: {}
                     TextTransformations:
-                      - Type: LOWERCASE
-                        Priority: 0
+                      - Priority: 1
+                        Type: URL_DECODE
+                      - Priority: 2
+                        Type: HTML_ENTITY_DECODE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
                 - ByteMatchStatement:
@@ -379,21 +383,22 @@ Resources:
                       SingleHeader:
                         Name: Cookie
                     TextTransformations:
-                      - Type: LOWERCASE
-                        Priority: 0
+                      - Priority: 1
+                        Type: URL_DECODE
+                      - Priority: 2
+                        Type: HTML_ENTITY_DECODE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
                 - ByteMatchStatement:
                     FieldToMatch:
                       Body: {}
                     TextTransformations:
-                      - Type: LOWERCASE
-                        Priority: 0
+                      - Priority: 1
+                        Type: URL_DECODE
+                      - Priority: 2
+                        Type: HTML_ENTITY_DECODE
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
-
-
-
 
   WebAclApiGatewayAssociation:
     Type: AWS::WAFv2::WebACLAssociation
