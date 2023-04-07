@@ -104,7 +104,7 @@ Resources:
   LambdaApiGatewayStage:
     Type: AWS::ApiGateway::Stage ##Define publicación de la api
     Properties:
-      DeploymentId: !Ref gatewayDeploy
+      DeploymentId: !Ref GatewayDeploy
       Description: Lambda API Stage v0
       RestApiId: !Ref MyRestApi
       StageName: !Ref Stage
