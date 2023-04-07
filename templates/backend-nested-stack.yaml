@@ -109,9 +109,6 @@ Resources:
       RestApiId: !Ref MyRestApi
       StageName: !Ref Stage
       TracingEnabled: true
-      AccessLogSetting:
-        DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "method": "$context.httpMethod", "resourcePath": "$context.resourcePath", "status": "$context.status", "responseLength": "$context.responseLength" }'
 
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
@@ -152,6 +149,11 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref MyRestApi
+      StageDescription:
+        LoggingLevel: INFO
+        AccessLogSetting:
+          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
+          Format: '{ "requestId": "$context.requestId", "path": "$context.path", "requestTime": "$context.requestTime", "httpMethod": "$context.httpMethod","statusCode": "$context.status", "errorMessage": "$context.error.message" }'
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
     Type: AWS::ApiGateway::Resource
