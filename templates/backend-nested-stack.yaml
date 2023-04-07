@@ -106,7 +106,7 @@ Resources:
     DependsOn: ApiGatewayLogGroup
     Properties:
       DeploymentId: !Ref GatewayDeploy
-      Description: Lambda API Stage v
+      Description: Lambda API Stage v1
       RestApiId: !Ref MyRestApi
       StageName: !Ref Stage
       TracingEnabled: true
