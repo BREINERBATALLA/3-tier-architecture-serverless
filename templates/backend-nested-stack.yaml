@@ -149,7 +149,7 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref MyRestApi
-      StageName: !Ref Stage
+      StageName: prueba
       StageDescription:
         LoggingLevel: INFO
         AccessLogSetting:
