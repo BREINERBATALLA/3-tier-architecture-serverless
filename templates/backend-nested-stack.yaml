@@ -116,7 +116,7 @@ Resources:
 
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
-    DependsOn: CloudWatchRole
+    DependsOn: CloudWatchRoleApi
     Properties:
       LogGroupName: /aws/api-gateway/MyRestApiLogs
 
