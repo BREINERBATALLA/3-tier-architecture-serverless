@@ -112,6 +112,7 @@ Resources:
 
   ApiGatewayLogGroup:
     Type: AWS::Logs::LogGroup
+    DependsOn: CloudWatchRole
     Properties:
       LogGroupName: /aws/api-gateway/MyRestApiLogs
 
@@ -140,6 +141,7 @@ Resources:
 ############################################## DEPLOY API ###################################
   GatewayDeploy:
     Type: AWS::ApiGateway::Deployment
+    DependsOn: ApiGatewayLogGroup
     Properties:
       RestApiId: !Ref MyRestApi
       StageName: prueba
