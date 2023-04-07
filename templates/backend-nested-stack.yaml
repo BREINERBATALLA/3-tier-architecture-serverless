@@ -103,44 +103,12 @@ Resources:
 ############################################## STAGE API ###################################
   LambdaApiGatewayStage:
     Type: AWS::ApiGateway::Stage ##Define publicación de api
-    DependsOn: ApiGatewayLogGroup
     Properties:
       DeploymentId: !Ref GatewayDeploy
       Description: Lambda API Stage v1
       RestApiId: !Ref MyRestApi
       StageName: !Ref Stage
       TracingEnabled: true
-      AccessLogSetting:
-          DestinationArn: !GetAtt ApiGatewayLogGroup.Arn
-          Format: '{ "requestId": "$context.requestId", "path": "$context.path", "requestTime": "$context.requestTime", "httpMethod": "$context.httpMethod","statusCode": "$context.status", "errorMessage": "$context.error.message" }'
-
-  ApiGatewayLogGroup:
-    Type: AWS::Logs::LogGroup
-    DependsOn: CloudWatchRoleApi
-    Properties:
-      LogGroupName: /aws/api-gateway/MyRestApiLogs
-
-  CloudWatchRoleApi:
-    Type: AWS::IAM::Role
-    Properties:
-      Description: Allows the API to log errors to CloudWatch Logs
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - apigateway.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Path: "/"
-      ManagedPolicyArns:
-        - "arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs"
-
-  Account:
-    Type: 'AWS::ApiGateway::Account'
-    Properties:
-      CloudWatchRoleArn: !GetAtt CloudWatchRoleApi.Arn
 
 ############################################## DEPLOY API ###################################
   GatewayDeploy:
@@ -148,7 +116,6 @@ Resources:
     Properties:
       RestApiId: !Ref MyRestApi
 
-        
 ############################################## RECURSOS API ###################################
   MyResourceGeneral:
     Type: AWS::ApiGateway::Resource
