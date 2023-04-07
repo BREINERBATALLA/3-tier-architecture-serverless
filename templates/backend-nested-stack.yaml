@@ -400,7 +400,7 @@ Resources:
     DependsOn: WebACLApiGateway 
     Properties: 
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/${Stage}'
-      WebACLArn: !Ref WebACLApiGateway
+      WebACLArn: !GetAtt WebACLApiGateway.Arn
 
 ############################################## FUNCIONES LAMBDA ###################################
 
