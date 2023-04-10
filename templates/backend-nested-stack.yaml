@@ -396,12 +396,7 @@ Resources:
                     PositionalConstraint: CONTAINS
                     SearchString: "<script>"
 
-  WebAclApiGatewayAssociation:
-    Type: AWS::WAFv2::WebACLAssociation
-    DependsOn: WebACLApiGateway 
-    Properties: 
-      ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/prod'
-      WebACLArn: !GetAtt WebACLApiGateway.Arn
+##here webaclAssociation
 ############################################## FUNCIONES LAMBDA ###################################
 
   GetAllFunction:
