@@ -13,7 +13,7 @@ Parameters:
   NameTableDynamo:
     Type: String
     Default: products
-    Description: Tabless name dynamoDB
+    Description: Table name dynamoDB
   NameObject:
     Type: String
     Default: backend.zip
@@ -398,7 +398,6 @@ Resources:
 
   WebAclApiGatewayAssociation:
     Type: AWS::WAFv2::WebACLAssociation
-    DependsOn: WebACLApiGateway 
     Properties: 
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/prod'
       WebACLArn: !GetAtt WebACLApiGateway.Arn
@@ -755,8 +754,8 @@ Resources:
   
 Outputs:
   UriFrontEnd:
-    Value: !Sub '${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}'
-    Description: Uri to consume backend resources.
+    Value: !Sub 'https://${MyRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}'
+    Description: Uri to consume backend resources
   Object:
     Value: !Ref NameObject
     Description: Name object
