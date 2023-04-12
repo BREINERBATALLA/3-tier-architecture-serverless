@@ -399,8 +399,9 @@ Resources:
   WebAclApiGatewayAssociation:
     Type: AWS::WAFv2::WebACLAssociation
     DependsOn: 
+      - WebACLApiGateway
       - LambdaApiGatewayStage
-      - WebACLApiGatew
+      - GatewayDeploy
     Properties: 
       ResourceArn: !Sub 'arn:aws:apigateway:${AWS::Region}::/restapis/${MyRestApi}/stages/${Stage}'
       WebACLArn: !GetAtt WebACLApiGateway.Arn
