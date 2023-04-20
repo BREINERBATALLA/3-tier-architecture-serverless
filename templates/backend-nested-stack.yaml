@@ -723,7 +723,35 @@ Resources:
                 Action:
                   - "xray:PutTraceSegments"
                   - "xray:PutTelemetryRecords"
-                Resource: "*"    
+                Resource: "*"
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: SNSTopic
+      Subscription:
+        - Protocol: email
+          Endpoint: breiner.batalla@correounivalle.edu.co
+                
+  MyErrorMetric:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: MyErrorMetric
+      AlarmDescription: Error on MyLambdaFunction
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      EvaluationPeriods: '1'
+      MetricName: Errors
+      Namespace: AWS/Lambda
+      Period: '60'
+      Statistic: SampleCount
+      Threshold: '1'
+      AlarmDescription: 'Error on MyLambdaFunction'
+      AlarmActions:
+        - Ref: SNSTopic
+      Dimensions:
+        - Name: FunctionName
+          Value: !Sub "${PutFunction}"
+    
 
 ############################################## PERMISSIONS LAMBDA ###################################
 
