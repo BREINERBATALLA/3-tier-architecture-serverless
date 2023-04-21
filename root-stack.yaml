@@ -34,6 +34,10 @@ Parameters:
     Type: String
     Default: logging-cloudfront-final-challenge
     Description: Name bucket that contains logging cloudfront
+  Email:
+    Type: String
+    Default: breiner.batalla@correounivalle.edu.co
+    Description: email subscribe to sns topic
 
 Resources:
 
@@ -96,7 +100,7 @@ Resources:
         NameObject: !Ref NameObject
         Prefix: !Ref PrefixDomain
         NameBucketImages: !Ref NameBucketImagesProducts 
-
+        EmailSubscriber: !Ref Email
 Outputs:
   CloudFrontUrl: 
     Value: !GetAtt FrontendStack.Outputs.CloudFrontEndPoint
